@@ -1,7 +1,7 @@
 #include <Esp32WifiManager.h>
 
-const char* ssid = "Hackspace";    //  Your Wi-Fi Name
-const char* password = "you@hackspace";   // Wi-Fi Password
+const char* ssid = "IIR_WiFi";    //  Your Wi-Fi Name
+const char* password = "deeprobotics";   // Wi-Fi Password
 int LED = 12;   //
 WiFiServer server(80);
 
