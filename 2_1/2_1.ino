@@ -1,15 +1,18 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "IIR_WiFi";    //  Your Wi-Fi Name
-const char* password = "deeprobotics";   // Wi-Fi Password
+const char* ssid = "Hackspace";    //  Your Wi-Fi Name
+const char* password = "you@hackspace";   // Wi-Fi Password
 
-int LED = 12; 
+int LED = 14; 
 int buttonPin = 0;
 bool ledState = false;
 WiFiServer server(80);
 
-const char* serverAddress = "http://192.168.68.73";
+unsigned long lastTime = 0;
+unsigned long timerDelay = 200;
+
+const char* serverAddress = "http://192.168.3.5";
 
 void setup()
 {
@@ -34,48 +37,33 @@ void setup()
 
 void loop()
 {
-    if (digitalRead(buttonPin) == HIGH) 
+    if (digitalRead(buttonPin) == LOW && millis() - lastTime > timerDelay) 
     {
-        if(WiFi.status()== WL_CONNECTED)
+        if(WiFi.status() == WL_CONNECTED)
         {
             WiFiClient client;
             HTTPClient http;
             String serverPath = serverAddress + String(ledState ? "/LED=ON" : "/LED=OFF");
             http.begin(client, serverPath.c_str());
             int httpResponseCode = http.GET();
-            if (httpResponseCode > 0) {
-                Serial.print("HTTP Response code: ");
-                Serial.println(httpResponseCode);
-                String payload = http.getString();
-                Serial.println(payload);
-                ledState ^= true;
-            }
-            else 
-            {
-                Serial.print("Error code: ");
-                Serial.println(httpResponseCode);
-            }
-            // Free resources
+            Serial.print("HTTP Response code: ");
+            Serial.println(httpResponseCode);
+            ledState ^= true;
             http.end();
         }
         else
             Serial.println("WiFi Disconnected");
-        delay(1000);
+        lastTime = millis();
     }
 
     WiFiClient client = server.available();
-    if(client.available())
-    {
-        String request = client.readStringUntil('\r');
-        Serial.print("Input request: ");
-        Serial.println(request);
-        client.flush();
+    String request = client.readStringUntil('\r');
+    client.flush();
 
-        if(request.indexOf("/LED=ON") != -1)
-            digitalWrite(LED, HIGH); // Turn LED ON
-        if(request.indexOf("/LED=OFF") != -1)
-            digitalWrite(LED, LOW); // Turn LED OFF
-    }
+    if(request.indexOf("/LED=ON") != -1)
+        digitalWrite(LED, HIGH); // Turn LED ON
+    if(request.indexOf("/LED=OFF") != -1)
+        digitalWrite(LED, LOW); // Turn LED OFF
 }
 
 
