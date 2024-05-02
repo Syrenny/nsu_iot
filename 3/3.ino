@@ -1,141 +1,94 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <DHT.h>
+#include <ArduinoJson.h>
 
-bool States_1[][3] = {
-    //red yellow green
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, true, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, true, false}
-};
+const char* ssid = "Hackspace";
+const char* password = "you@hackspace";
 
-bool States_2[][3] = {
-    //red yellow green
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, false, false},
-    {true, true, false},
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, false, false},
-    {false, false, true},
-    {false, true, false}
-};
+#define DHTPIN 27     // Пин, к которому подключен датчик DHT11
+#define DHTTYPE DHT11   // Укажите тип датчика DHT
 
-const int Duration[] = {6, 1, 1, 1, 1, 1, 1, 3, 6, 1, 1, 1, 1, 1, 1, 3};
+DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid = "Hackspace";    //  Your Wi-Fi Name
-const char* password = "you@hackspace";   // Wi-Fi Password
-
-int LED = 14; 
-bool ledState = false;
 WiFiServer server(80);
 
-unsigned long lastTime = 0;
-unsigned long timerDelay = 200;
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
 
-const char* serverAddress = "http://192.168.3.5";
-int state = 0
-
-void setup()
-{
-    Serial.begin(115200); //Default Baudrate
-    pinMode(LED, OUTPUT);
-    digitalWrite(LED, HIGH);
-    Serial.println("Connecting to the Network");
     WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED)
+    Serial.println("Connecting to WiFi...");
+
+    while (WiFi.status() != WL_CONNECTED) 
     {
-        delay(500);
-        Serial.print(".");
+        delay(1000);
+        Serial.println("...");
     }
-    Serial.println("WiFi connected"); 
-    server.begin();  // Starts the Server
-    Serial.println("Server started");
+
+    Serial.println("Connected to WiFi");
+
     Serial.print("IP Address of network: "); // will IP address on Serial Monitor
-    Serial.print(WiFi.localIP());
-    Serial.println("/");
+    Serial.println(WiFi.localIP());   
+
+    dht.begin();
+
+    server.begin();
+    Serial.println("HTTP server started");
 }
 
-void loop()
-{
-    if(WiFi.status() == WL_CONNECTED)
-    {
-        WiFiClient client;
-        HTTPClient http;
-        String serverPath = serverAddress + String(ledState ? "/LED=ON" : "/LED=OFF");
-        http.begin(client, serverPath.c_str());
-        int httpResponseCode = http.GET();
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
-        ledState ^= true;
-        http.end();
-    }
-    else
-        Serial.println("WiFi Disconnected");
-
-
-    if(millis() - lastTime > )
-
-
-
-
-
-
-
-
-
-    if (millis() - lastTime > timerDelay) 
-    {
-        if(WiFi.status() == WL_CONNECTED)
-        {
-            WiFiClient client;
-            HTTPClient http;
-            String serverPath = serverAddress + String(ledState ? "/LED=ON" : "/LED=OFF");
-            http.begin(client, serverPath.c_str());
-            int httpResponseCode = http.GET();
-            Serial.print("HTTP Response code: ");
-            Serial.println(httpResponseCode);
-            ledState ^= true;
-            http.end();
-        }
-        else
-            Serial.println("WiFi Disconnected");
-        lastTime = millis();
-    }
-
+void loop() {
     WiFiClient client = server.available();
+    if (!client)
+        return;
+
+    while (!client.available())
+        delay(1);
+
+
     String request = client.readStringUntil('\r');
     client.flush();
 
-    if(request.indexOf("/LED=ON") != -1)
-        digitalWrite(LED, HIGH); // Turn LED ON
-    if(request.indexOf("/LED=OFF") != -1)
-        digitalWrite(LED, LOW); // Turn LED OFF
+    if (request.indexOf("/temperature") != -1) 
+    {
+        float temperature = dht.readTemperature();
+
+        DynamicJsonDocument doc(128);
+        doc["temperature"] = temperature;
+
+        String response;
+        serializeJson(doc, response);
+
+        client.println("HTTP/1.1 200 OK");
+        client.println("Content-Type: application/json");
+        client.println("Connection: close");
+        client.println();
+        client.println(response);
+    } 
+    else if (request.indexOf("/humidity") != -1) 
+    {
+        float humidity = dht.readHumidity();
+
+        DynamicJsonDocument doc(128);
+        doc["humidity"] = humidity;
+
+        String response;
+        serializeJson(doc, response);
+
+        client.println("HTTP/1.1 200 OK");
+        client.println("Content-Type: application/json");
+        client.println("Connection: close");
+        client.println();
+        client.println(response);
+    } 
+    else 
+    {
+    client.println("HTTP/1.1 404 Not Found");
+    client.println("Content-Type: text/plain");
+    client.println("Connection: close");
+    client.println();
+    client.println("Not found");
+    }
+    delay(1);
+    client.stop();
 }
-
-
-
-
-
-
-
