@@ -21,8 +21,8 @@ int redPin = 12;
 int yellowPin = 14;
 int greenPin = 27;
 
-const char* ssid = "Hackspace";    // Your Wi-Fi Name
-const char* password = "you@hackspace";   // Wi-Fi Password
+const char* ssid = "MI 8";    // Your Wi-Fi Name
+const char* password = "13579246";   // Wi-Fi Password
 
 const char* mqttServer = "srv2.clusterfly.ru";
 const int mqttPort = 9991;

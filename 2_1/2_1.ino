@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "Hackspace";    //  Your Wi-Fi Name
-const char* password = "you@hackspace";   // Wi-Fi Password
+const char* ssid = "MI 8";    //  Your Wi-Fi Name
+const char* password = "13579246";   // Wi-Fi Password
 
 int LED = 14; 
 int buttonPin = 0;
@@ -12,7 +12,7 @@ WiFiServer server(80);
 unsigned long lastTime = 0;
 unsigned long timerDelay = 200;
 
-const char* serverAddress = "http://192.168.3.5";
+const char* serverAddress = "http://192.168.43.147";
 
 void setup()
 {

@@ -11,8 +11,8 @@
 #include <Update.h>
 
 const char* host = "esp32";
-const char* ssid = "Hackspace";
-const char* password = "you@hackspace";
+const char* ssid = "MI 8";
+const char* password = "13579246";
 
 WebServer server(80);
 

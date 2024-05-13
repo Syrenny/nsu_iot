@@ -74,14 +74,14 @@ DHT dht(DHTPIN, DHTTYPE);
 unsigned long lastTime = 0;
 unsigned long timerDelay = 1000;
 
-const char* ssid = "Hackspace";    // Your Wi-Fi Name
-const char* password = "you@hackspace";   // Wi-Fi Password
+const char* ssid = "MI 8";    // Your Wi-Fi Name
+const char* password = "13579246";   // Wi-Fi Password
 
 const char* mqttServer = "srv2.clusterfly.ru";
 const int mqttPort = 9991;
-const char* mqttUser = "user_1f40dd56";
-const char* mqttPassword = "FYXS8AV-U-pgH";
-const char* mqttTopic = "user_1f40dd56/dht11";
+const char* mqttUser = "user_77cc5c3b";
+const char* mqttPassword = "pass_15962450";
+const char* mqttTopic = "user_77cc5c3b/topic";
 
 int redPin = 12;
 int yellowPin = 14;
@@ -123,7 +123,7 @@ void reconnect()
     while (!client.connected()) 
     {
         Serial.print("Attempting MQTT connection...");
-        if (client.connect("ESP32Client_42", mqttUser, mqttPassword, NULL, NULL, NULL, NULL, true)) {
+        if (client.connect("ESP32Client_40", mqttUser, mqttPassword, NULL, NULL, NULL, NULL, true)) {
             Serial.println("connected");
             client.subscribe(mqttTopic);
         } else 
